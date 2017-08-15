@@ -6,27 +6,42 @@
             type="com.newfivefour.votefinder.Model"
             />
     </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
     <android.support.constraint.ConstraintLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         tools:context="com.example.user.votefinder.com.example.user.votefinder.MainActivity">
 
+        <TextView
+            android:id="@+id/division_title_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text='@{(model.divisions.size>0) ? model.divisions.get(0).asJsonObject.get("name").toString() : "hmm"}'
+            />
+
         <com.newfivefour.votefinder.views.DivisionsSpinner
+            android:id="@+id/divisions_spinner"
+            app:layout_constraintTop_toBottomOf="@id/division_title_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:divisions="@{model.divisions}">
         </com.newfivefour.votefinder.views.DivisionsSpinner>
 
-        <TextView
-            android:layout_width="wrap_content"
+
+        <com.newfivefour.votefinder.views.DivisionDisplayCount
+            app:layout_constraintTop_toBottomOf="@id/divisions_spinner"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text='@{(model.division.size>0) ? model.divisions.get(0).asJsonObject.get("name").toString() : "hmm"}'
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(0).asJsonArray : null}"
+            >
+        </com.newfivefour.votefinder.views.DivisionDisplayCount>
 
     </android.support.constraint.ConstraintLayout>
+        </ScrollView>
+
 </layout>

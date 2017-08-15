@@ -79,9 +79,9 @@ class MainActivity : AppCompatActivity() {
                 }.map { it.asJsonObject.get("mp_id") }
 
                 model.division = vote
-                model.allvotes.addAll(Gson().fromJson<JsonArray>(Gson().toJson(
+                model.allvotes = Gson().fromJson<JsonArray>(Gson().toJson(
                         listOf(ayes, noes, absent, not_in_house)
-                ), JsonArray::class.java))
+                ), JsonArray::class.java)
 
                 Observable.just(it)
             }
