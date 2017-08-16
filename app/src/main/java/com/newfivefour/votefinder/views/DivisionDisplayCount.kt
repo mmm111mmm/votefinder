@@ -19,6 +19,8 @@ import android.util.Log
 import android.widget.TextView
 import com.newfivefour.votefinder.MainActivity
 import com.newfivefour.votefinder.Model
+import android.databinding.DataBindingUtil
+import com.newfivefour.votefinder.databinding.DivisionMpBlockBinding
 
 
 class DivisionDisplayCount : FrameLayout {
@@ -55,7 +57,7 @@ class DivisionDisplayCount : FrameLayout {
             rc?.adapter = MyRecycler()
             rc?.layoutManager = GridLayoutManager(context, grid, GridLayoutManager.VERTICAL, false)
 
-            Log.d("TAG", rc?.width.toString() + " " + dpWidth.toString() + " " + "" + (28 * grid) + " " + padding)
+            //Log.d("TAG", rc?.width.toString() + " " + dpWidth.toString() + " " + "" + (28 * grid) + " " + padding)
         }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
@@ -84,7 +86,7 @@ class DivisionDisplayCount : FrameLayout {
     inner class MyRecycler : RecyclerView.Adapter<MyRecycler.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val v = LayoutInflater.from(parent.context).inflate(R.layout.division_mp_block, parent, false)
+            val v= DataBindingUtil.inflate<DivisionMpBlockBinding>(LayoutInflater.from(parent.context), R.layout.division_mp_block, parent, false)
             val vh = ViewHolder(v)
             return vh
         }
@@ -109,11 +111,10 @@ class DivisionDisplayCount : FrameLayout {
             return if(votes!=null) votes!!.size() else 0
         }
 
-        inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            public val block: View
-
+        inner class ViewHolder(itemView: DivisionMpBlockBinding) : RecyclerView.ViewHolder(itemView.root) {
+            val block: View
             init {
-                block = itemView.findViewById<View>(R.id.division_mp_block_view)
+                block = itemView.divisionMpBlockView
             }
         }
     }

@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Button
 import com.google.gson.Gson
 import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.newfivefour.votefinder.databinding.ActivityMainBinding
 import io.reactivex.Observable
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         binding.model = model
-        binding.utils = Utils()
+        binding.utils = Utils
 
 
         // vote finder
@@ -40,58 +41,9 @@ class MainActivity : AppCompatActivity() {
                 Observable.just(it)
             }
 
-        val divisionDetails = EndPoints.divisionsDetailsObservable("CD:2017-07-17:275")
-            .flatMap {
-                Log.d("TAG", "divisions")
-                val vote = it.getAsJsonObject("result").getAsJsonArray("items").get(0).asJsonObject
 
-                val division_date = DateTime.parse(vote.getAsJsonObject("date").get("_value").toString().replace("\"", ""))
-                val division_dateLong = division_date.toDate().time
-                val current_constituencies = model.constituencies.filter {
-                    it.asJsonObject.getAsJsonArray("mp_statuses").filter {
-                        val startLong = DateTime.parse((it.asJsonArray[0].toString().replace("\"", ""))).toDate().time
-                        val endLong =
-                                (if(!it.asJsonArray[1].isJsonNull) DateTime.parse((it.asJsonArray[1].toString().replace("\"", "")))
-                                else DateTime.now()).toDate().time
-                        division_dateLong in startLong..endLong
-                    }.isNotEmpty()
-                }
-
-                var ayes = arrayListOf<String>()
-                var noes = arrayListOf<String>()
-                current_constituencies.forEach {
-                    var c = it.asJsonObject
-                    var member = vote.getAsJsonArray("vote").filter {
-                        c.get("mp_id") == it.asJsonObject.get("id")
-                    }
-                    if(member.size != 0)
-                        member.forEach {
-                            if(it.asJsonObject.get("type").asString.indexOf("Aye")!=-1)
-                                ayes.add(c.get("mp_id").asString)
-                            if(it.asJsonObject.get("type").asString.indexOf("No")!=-1)
-                                noes.add(c.get("mp_id").asString)
-                        }
-                }
-
-                val not_in_house = model.constituencies.filter {
-                    current_constituencies.indexOf(it)==-1
-                }.map { it.asJsonObject.get("mp_id").asString }
-
-                var absent = model.constituencies.filter {
-                    not_in_house.indexOf(it.asJsonObject.get("mp_id").asString)==-1
-                    && ayes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
-                    && noes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
-                }.map { it.asJsonObject.get("mp_id") }
-
-                model.division = vote
-                model.allvotes = Gson().fromJson<JsonArray>(Gson().toJson(
-                        listOf(ayes, noes, absent, not_in_house)
-                ), JsonArray::class.java)
-
-                Observable.just(it)
-            }
-
-        Observable.zip(mps,divisionDetails, BiFunction { _:JsonArray, _:JsonObject -> Unit }).subscribe()
+        Observable.zip(mps,EndPoints.divisionDetails("CD:2017-07-17:275"),
+                BiFunction { _:JsonArray, _:JsonElement -> Unit }).subscribe()
 
         EndPoints.divisionsList {
             model.divisions = it

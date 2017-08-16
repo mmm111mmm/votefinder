@@ -25,7 +25,7 @@
             android:id="@+id/division_title_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text='@{(model.divisions.size>0) ? model.divisions.get(0).asJsonObject.get("name").toString() : "hmm"}'
+            android:text='@{(model.divisions.size>0) ? model.divisions.get(model.division_select_number).asJsonObject.get("name").toString() : "hmm"}'
             />
 
         <LinearLayout
@@ -83,6 +83,15 @@
             android:layout_height="wrap_content"
             app:title='@{(model.allvotes.size>0) ? "Absent ("+model.allvotes.get(2).asJsonArray.size+")" : ""}'
             app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(2).asJsonArray : null}"
+            />
+
+        <com.newfivefour.votefinder.views.DivisionDisplayCount
+            android:id="@+id/divisions_hadnotentered"
+            app:layout_constraintTop_toBottomOf="@id/divisions_absent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title='@{(model.allvotes.size>0) ? "Had not entered parliament ("+model.allvotes.get(3).asJsonArray.size+")" : ""}'
+            app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(3).asJsonArray : null}"
             />
 
     </android.support.constraint.ConstraintLayout>

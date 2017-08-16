@@ -1,11 +1,15 @@
 package com.newfivefour.votefinder
 
 import android.support.annotation.NonNull
+import android.util.Log
+import com.google.gson.Gson
 import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.joda.time.DateTime
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -31,7 +35,58 @@ object EndPoints {
         .division(uin)
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
-    //fun divisionsDetails(uin:String, f: (JsonObject) -> Unit) = divisionsDetailsObservable().subscribe(f)
+    fun divisionDetails(uin:String):Observable<JsonElement> {
+        return divisionsDetailsObservable(uin)
+            .flatMap {
+                Log.d("TAG", "divisions")
+                val vote = it.getAsJsonObject("result").getAsJsonArray("items").get(0).asJsonObject
+
+                val division_date = DateTime.parse(vote.getAsJsonObject("date").get("_value").toString().replace("\"", ""))
+                val division_dateLong = division_date.toDate().time
+                val current_constituencies = MainActivity.model.constituencies.filter {
+                    it.asJsonObject.getAsJsonArray("mp_statuses").filter {
+                        val startLong = DateTime.parse((it.asJsonArray[0].toString().replace("\"", ""))).toDate().time
+                        val endLong =
+                                (if(!it.asJsonArray[1].isJsonNull) DateTime.parse((it.asJsonArray[1].toString().replace("\"", "")))
+                                else DateTime.now()).toDate().time
+                        division_dateLong in startLong..endLong
+                    }.isNotEmpty()
+                }
+
+                var ayes = arrayListOf<String>()
+                var noes = arrayListOf<String>()
+                current_constituencies.forEach {
+                    var c = it.asJsonObject
+                    var member = vote.getAsJsonArray("vote").filter {
+                        c.get("mp_id") == it.asJsonObject.get("id")
+                    }
+                    if(member.size != 0)
+                        member.forEach {
+                            if(it.asJsonObject.get("type").asString.indexOf("Aye")!=-1)
+                                ayes.add(c.get("mp_id").asString)
+                            if(it.asJsonObject.get("type").asString.indexOf("No")!=-1)
+                                noes.add(c.get("mp_id").asString)
+                        }
+                }
+
+                val not_in_house = MainActivity.model.constituencies.filter {
+                    current_constituencies.indexOf(it)==-1
+                }.map { it.asJsonObject.get("mp_id").asString }
+
+                var absent = MainActivity.model.constituencies.filter {
+                    not_in_house.indexOf(it.asJsonObject.get("mp_id").asString)==-1
+                            && ayes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
+                            && noes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
+                }.map { it.asJsonObject.get("mp_id") }
+
+                MainActivity.model.division = vote
+                MainActivity.model.allvotes = Gson().fromJson<JsonArray>(Gson().toJson(
+                        listOf(ayes, noes, absent, not_in_house)
+                ), JsonArray::class.java)
+
+                Observable.just(it)
+            }
+    }
 
     interface MPsList { @GET("/mps") fun mps(): Observable<JsonArray> }
     val mpsObservable: Observable<JsonArray> = repo.create(MPsList::class.java)
