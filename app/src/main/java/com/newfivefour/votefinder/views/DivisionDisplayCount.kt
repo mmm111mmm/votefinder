@@ -67,6 +67,8 @@ class DivisionDisplayCount : FrameLayout {
 
         val layoutInflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         this.layout = layoutInflator.inflate(R.layout.division_display_count, this)
+        layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
+                ?.isNestedScrollingEnabled = false
     }
 
     public override fun onRestoreInstanceState(state: Parcelable) {
@@ -94,7 +96,7 @@ class DivisionDisplayCount : FrameLayout {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.block.setBackgroundColor(Color.RED)
             var id = MainActivity.model.ck[votes?.get(position)!!.asString].asJsonObject.get("mp_party_no").toString().replace("\"", "")
-            holder.block.setBackgroundColor(if(id=="15") Color.RED
+            holder.block.setBackgroundColor(if(id=="15") resources.getColor(R.color.lab)
             else if(id=="29") resources.getColor(R.color.snp) // SNP
             else if(id=="17") resources.getColor(R.color.lib) // Lib
             else if(id=="30") resources.getColor(R.color.sinn) // Sinn Fein
@@ -103,8 +105,6 @@ class DivisionDisplayCount : FrameLayout {
             else if(id=="44") resources.getColor(R.color.green) // Green
             else if(id=="22") resources.getColor(R.color.plaid) // Plaid
             else resources.getColor(R.color.unknown_party))
-
-            //holder.textView.text = "Stuff, innit. " + position
         }
 
         override fun getItemCount():Int {
@@ -112,10 +112,7 @@ class DivisionDisplayCount : FrameLayout {
         }
 
         inner class ViewHolder(itemView: DivisionMpBlockBinding) : RecyclerView.ViewHolder(itemView.root) {
-            val block: View
-            init {
-                block = itemView.divisionMpBlockView
-            }
+            val block: View = itemView.divisionMpBlockView
         }
     }
 }

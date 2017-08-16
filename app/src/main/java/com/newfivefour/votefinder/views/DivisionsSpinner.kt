@@ -6,14 +6,12 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import com.google.gson.JsonArray
 import com.newfivefour.votefinder.R
-import android.widget.Toast
 import android.widget.AdapterView.OnItemSelectedListener
 import com.newfivefour.votefinder.MainActivity
 import com.newfivefour.votefinder.Utils
@@ -32,6 +30,17 @@ class DivisionsSpinner : FrameLayout {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.adapter = adapter
+            this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.onItemSelectedListener =
+                    object : OnItemSelectedListener {
+                        override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, id: Long) {
+                            if(MainActivity.model.division_select_number != pos) {
+                                MainActivity.model.division_select_number = pos
+                                Utils.updateBill()
+                            }
+                        }
+                        override fun onNothingSelected(parent: AdapterView<*>) {}
+                    }
+
         }
     var selected:Int = 0
         set(value) {
@@ -44,24 +53,7 @@ class DivisionsSpinner : FrameLayout {
 
         val layoutInflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         this.layout = layoutInflator.inflate(R.layout.divisions_spinner, this)
-
-        this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.onItemSelectedListener =
-                object : OnItemSelectedListener {
-                        override fun onItemSelected(parent: AdapterView<*>,
-                                                    view: View, pos: Int, id: Long) {
-                            Log.d("TAG", ""+pos)
-                            if(MainActivity.model.division_select_number != pos) {
-                                MainActivity.model.division_select_number = pos
-                                Utils.updateBill()
-                            }
-                        }
-
-                        override fun onNothingSelected(parent: AdapterView<*>) {
-                        }
-                }
-
     }
-
     public override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
             super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
@@ -69,7 +61,6 @@ class DivisionsSpinner : FrameLayout {
         }
         super.onRestoreInstanceState(state)
     }
-
     public override fun onSaveInstanceState(): Parcelable? {
         val bundle = Bundle()
         bundle.putParcelable("instanceState", super.onSaveInstanceState())
