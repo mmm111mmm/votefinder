@@ -2,6 +2,7 @@ package com.newfivefour.votefinder.views
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -13,19 +14,26 @@ import android.view.View
 import com.google.gson.JsonArray
 import com.newfivefour.votefinder.R
 import android.view.ViewGroup
-import android.support.v7.widget.LinearLayoutManager
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Display
-
+import android.widget.TextView
+import com.newfivefour.votefinder.MainActivity
+import com.newfivefour.votefinder.Model
 
 
 class DivisionDisplayCount : FrameLayout {
+    val model = Model()
+
     constructor(context: Context) : super(context) { init(null, 0) }
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init(attrs, 0) }
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init(attrs, defStyle) }
 
     var layout:View? = null
+    var title:String? = ""
+        set(value) {
+            val tv:TextView? = layout?.findViewById<TextView>(R.id.division_display_count_title_textview)
+            tv?.text = value
+        }
     var votes:JsonArray? = JsonArray()
         set(value) {
             field = value
@@ -82,6 +90,18 @@ class DivisionDisplayCount : FrameLayout {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.block.setBackgroundColor(Color.RED)
+            var id = MainActivity.model.ck[votes?.get(position)!!.asString].asJsonObject.get("mp_party_no").toString().replace("\"", "")
+            holder.block.setBackgroundColor(if(id=="15") Color.RED
+            else if(id=="29") resources.getColor(R.color.snp) // SNP
+            else if(id=="17") resources.getColor(R.color.lib) // Lib
+            else if(id=="30") resources.getColor(R.color.sinn) // Sinn Fein
+            else if(id=="7") resources.getColor(R.color.dup) // DUP
+            else if(id=="4") resources.getColor(R.color.cons) // Cons
+            else if(id=="44") resources.getColor(R.color.green) // Green
+            else if(id=="22") resources.getColor(R.color.plaid) // Plaid
+            else resources.getColor(R.color.unknown_party))
+
             //holder.textView.text = "Stuff, innit. " + position
         }
 
@@ -90,10 +110,10 @@ class DivisionDisplayCount : FrameLayout {
         }
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            //private val textView: TextView
+            public val block: View
 
             init {
-                //textView = itemView.findViewById(R.id.listtext) as TextView
+                block = itemView.findViewById<View>(R.id.division_mp_block_view)
             }
         }
     }

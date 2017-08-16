@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Spinner
@@ -25,6 +26,11 @@ class DivisionsSpinner : FrameLayout {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.adapter = adapter
+        }
+    var selected:Int = 0
+        set(value) {
+            Log.d("TAG", "hiya"+value)
+            this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.setSelection(value)
         }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {

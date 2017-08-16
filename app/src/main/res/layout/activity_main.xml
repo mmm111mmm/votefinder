@@ -5,6 +5,10 @@
             name="model"
             type="com.newfivefour.votefinder.Model"
             />
+        <variable
+            name="utils"
+            type="com.newfivefour.votefinder.Utils"
+            />
     </data>
 
     <ScrollView
@@ -24,22 +28,62 @@
             android:text='@{(model.divisions.size>0) ? model.divisions.get(0).asJsonObject.get("name").toString() : "hmm"}'
             />
 
-        <com.newfivefour.votefinder.views.DivisionsSpinner
-            android:id="@+id/divisions_spinner"
-            app:layout_constraintTop_toBottomOf="@id/division_title_textview"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:divisions="@{model.divisions}">
-        </com.newfivefour.votefinder.views.DivisionsSpinner>
-
+            android:id="@+id/divisions_spinner_layout"
+            app:layout_constraintTop_toBottomOf="@id/division_title_textview"
+            android:weightSum="1.0"
+            android:orientation="horizontal">
+            <Button
+                android:layout_weight="0.1"
+                android:clickable="true"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> utils.changeBill(-1)}"
+                android:text="back"/>
+            <com.newfivefour.votefinder.views.DivisionsSpinner
+                android:layout_weight="0.8"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:selected="@{model.division_select_number}"
+                app:divisions="@{model.divisions}">
+            </com.newfivefour.votefinder.views.DivisionsSpinner>
+            <Button
+                android:layout_weight="0.1"
+                android:clickable="true"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> utils.changeBill(1)}"
+                android:text="forward"/>
+        </LinearLayout>
 
         <com.newfivefour.votefinder.views.DivisionDisplayCount
-            app:layout_constraintTop_toBottomOf="@id/divisions_spinner"
+            android:id="@+id/divisions_aye"
+            app:layout_constraintTop_toBottomOf="@id/divisions_spinner_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:title='@{(model.allvotes.size>0) ? "Ayes ("+model.allvotes.get(0).asJsonArray.size+")" : ""}'
             app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(0).asJsonArray : null}"
-            >
-        </com.newfivefour.votefinder.views.DivisionDisplayCount>
+            />
+
+        <com.newfivefour.votefinder.views.DivisionDisplayCount
+            android:id="@+id/divisions_no"
+            app:layout_constraintTop_toBottomOf="@id/divisions_aye"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title='@{(model.allvotes.size>0) ? "Noes ("+model.allvotes.get(1).asJsonArray.size+")" : ""}'
+            app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(1).asJsonArray : null}"
+            />
+
+        <com.newfivefour.votefinder.views.DivisionDisplayCount
+            android:id="@+id/divisions_absent"
+            app:layout_constraintTop_toBottomOf="@id/divisions_no"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:title='@{(model.allvotes.size>0) ? "Absent ("+model.allvotes.get(2).asJsonArray.size+")" : ""}'
+            app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(2).asJsonArray : null}"
+            />
 
     </android.support.constraint.ConstraintLayout>
         </ScrollView>

@@ -26,6 +26,11 @@ class Model : BaseObservable() {
         }
     var division = JsonObject()
     var division_select_number = 0
+        @Bindable get() = field
+        set(value) {
+            field = value
+            notifyChange()
+        }
     var allvotes: JsonArray = JsonArray()
         @Bindable get() = field
         set(value) {

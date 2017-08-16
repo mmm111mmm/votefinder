@@ -4,9 +4,9 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
     <View
+        android:id="@+id/division_mp_block_view"
         android:background="@android:color/holo_green_dark"
         android:layout_margin="2dp"
         android:layout_width="24dp"
         android:layout_height="24dp" />
-
 </LinearLayout>

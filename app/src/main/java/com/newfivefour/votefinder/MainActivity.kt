@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -14,12 +15,16 @@ import org.joda.time.DateTime
 
 class MainActivity : AppCompatActivity() {
 
-    val model = Model()
+    companion object {
+        val model = Model()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
-        .model = model
+        val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+        binding.model = model
+        binding.utils = Utils()
+
 
         // vote finder
 
@@ -29,7 +34,7 @@ class MainActivity : AppCompatActivity() {
                 model.constituencies = it
                 var ck = JsonObject()
                 it.forEach {
-                    ck.add(it.asJsonObject.get("mp_id").toString(), it)
+                    ck.add(it.asJsonObject.get("mp_id").toString().replace("\"", ""), it)
                 }
                 model.ck = ck
                 Observable.just(it)
