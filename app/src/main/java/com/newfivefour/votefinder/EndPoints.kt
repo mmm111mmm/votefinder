@@ -28,7 +28,16 @@ object EndPoints {
         .divisions()
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
-    fun divisionsList(@NonNull f: (JsonArray) -> Unit) = divisionListObservable.subscribe(f)
+    fun divisionsList(@NonNull f: (JsonArray) -> Unit) =
+            divisionListObservable
+                    .onErrorReturn {
+                        e ->
+                        MainActivity.model.loading = false
+                        MainActivity.model.error = true
+                        Log.d("HI in dl", ""+e)
+                        JsonArray()
+                    }
+                    .subscribe(f)
 
     interface DivisionDetails { @GET("/vote") fun division(@Query("uin") uin: String): Observable<JsonObject> }
     fun divisionsDetailsObservable(uin:String):Observable<JsonObject> = repo.create(DivisionDetails::class.java)
@@ -36,55 +45,66 @@ object EndPoints {
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
     fun divisionDetails(uin:String):Observable<JsonElement> {
+        MainActivity.model.loading = true
         return divisionsDetailsObservable(uin)
+            .onErrorReturn {
+                MainActivity.model.loading = false
+                MainActivity.model.error = true
+                JsonObject()
+            }
             .flatMap {
-                Log.d("TAG", "divisions")
-                val vote = it.getAsJsonObject("result").getAsJsonArray("items").get(0).asJsonObject
+                MainActivity.model.loading = false
+                MainActivity.model.error = false
+                if(it.get("result")==null) Observable.just(it)
+                else {
+                    Log.d("TAG", "divisions")
+                    val vote = it.getAsJsonObject("result").getAsJsonArray("items").get(0).asJsonObject
 
-                val division_date = DateTime.parse(vote.getAsJsonObject("date").get("_value").toString().replace("\"", ""))
-                val division_dateLong = division_date.toDate().time
-                val current_constituencies = MainActivity.model.constituencies.filter {
-                    it.asJsonObject.getAsJsonArray("mp_statuses").filter {
-                        val startLong = DateTime.parse((it.asJsonArray[0].toString().replace("\"", ""))).toDate().time
-                        val endLong =
-                                (if(!it.asJsonArray[1].isJsonNull) DateTime.parse((it.asJsonArray[1].toString().replace("\"", "")))
-                                else DateTime.now()).toDate().time
-                        division_dateLong in startLong..endLong
-                    }.isNotEmpty()
-                }
-
-                var ayes = arrayListOf<String>()
-                var noes = arrayListOf<String>()
-                current_constituencies.forEach {
-                    var c = it.asJsonObject
-                    var member = vote.getAsJsonArray("vote").filter {
-                        c.get("mp_id") == it.asJsonObject.get("id")
+                    val division_date = DateTime.parse(vote.getAsJsonObject("date").get("_value").toString().replace("\"", ""))
+                    val division_dateLong = division_date.toDate().time
+                    val current_constituencies = MainActivity.model.constituencies.filter {
+                        it.asJsonObject.getAsJsonArray("mp_statuses").filter {
+                            val startLong = DateTime.parse((it.asJsonArray[0].toString().replace("\"", ""))).toDate().time
+                            val endLong =
+                                    (if(!it.asJsonArray[1].isJsonNull) DateTime.parse((it.asJsonArray[1].toString().replace("\"", "")))
+                                    else DateTime.now()).toDate().time
+                            division_dateLong in startLong..endLong
+                        }.isNotEmpty()
                     }
-                    if(member.size != 0)
-                        member.forEach {
-                            if(it.asJsonObject.get("type").asString.indexOf("Aye")!=-1)
-                                ayes.add(c.get("mp_id").asString)
-                            if(it.asJsonObject.get("type").asString.indexOf("No")!=-1)
-                                noes.add(c.get("mp_id").asString)
+
+                    var ayes = arrayListOf<String>()
+                    var noes = arrayListOf<String>()
+                    current_constituencies.forEach {
+                        var c = it.asJsonObject
+                        var member = vote.getAsJsonArray("vote").filter {
+                            c.get("mp_id") == it.asJsonObject.get("id")
                         }
+                        if(member.size != 0)
+                            member.forEach {
+                                if(it.asJsonObject.get("type").asString.indexOf("Aye")!=-1)
+                                    ayes.add(c.get("mp_id").asString)
+                                if(it.asJsonObject.get("type").asString.indexOf("No")!=-1)
+                                    noes.add(c.get("mp_id").asString)
+                            }
+                    }
+
+                    val not_in_house = MainActivity.model.constituencies.filter {
+                        current_constituencies.indexOf(it)==-1
+                    }.map { it.asJsonObject.get("mp_id").asString }
+
+                    var absent = MainActivity.model.constituencies.filter {
+                        not_in_house.indexOf(it.asJsonObject.get("mp_id").asString)==-1
+                                && ayes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
+                                && noes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
+                    }.map { it.asJsonObject.get("mp_id") }
+
+                    MainActivity.model.division = vote
+                    MainActivity.model.allvotes = Gson().fromJson<JsonArray>(Gson().toJson(
+                            listOf(ayes, noes, absent, not_in_house)
+                    ), JsonArray::class.java)
+
+                    Observable.just(it)
                 }
-
-                val not_in_house = MainActivity.model.constituencies.filter {
-                    current_constituencies.indexOf(it)==-1
-                }.map { it.asJsonObject.get("mp_id").asString }
-
-                var absent = MainActivity.model.constituencies.filter {
-                    not_in_house.indexOf(it.asJsonObject.get("mp_id").asString)==-1
-                            && ayes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
-                            && noes.indexOf(it.asJsonObject.get("mp_id").asString)==-1
-                }.map { it.asJsonObject.get("mp_id") }
-
-                MainActivity.model.division = vote
-                MainActivity.model.allvotes = Gson().fromJson<JsonArray>(Gson().toJson(
-                        listOf(ayes, noes, absent, not_in_house)
-                ), JsonArray::class.java)
-
-                Observable.just(it)
             }
     }
 
@@ -96,11 +116,22 @@ object EndPoints {
     //fun mps(f: (JsonArray) -> Unit) = mpsObservable.subscribe(f)
 
     interface MPDetails { @GET("/mp_details") fun details(@Query("id") id:String): Observable<JsonObject> }
-    fun mpDetails(f: (JsonObject) -> Unit) = repo.create(MPDetails::class.java)
-        .details("523")
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(f)
+    fun mpDetails(mpid:String):Observable<JsonObject> {
+        return repo.create(MPDetails::class.java)
+                .details(mpid)
+                .doOnError {
+                    e ->
+                    Log.d("HI", ""+e)
+                }
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+    val updateMPModel = { a:JsonObject ->
+        MainActivity.model.loading = false
+        Log.d("TAG", a.toString())
+        MainActivity.model.constituency = a
+    }
+
 
     interface ConstituencySearch { @GET("/name") fun details(@Query("name") name:String): Observable<JsonArray> }
     fun constituencySearch(f: (JsonArray) -> Unit) =

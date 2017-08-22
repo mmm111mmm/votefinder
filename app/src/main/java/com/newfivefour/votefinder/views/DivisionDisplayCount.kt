@@ -20,6 +20,7 @@ import android.widget.TextView
 import com.newfivefour.votefinder.MainActivity
 import com.newfivefour.votefinder.Model
 import android.databinding.DataBindingUtil
+import com.newfivefour.votefinder.Updater
 import com.newfivefour.votefinder.databinding.DivisionMpBlockBinding
 
 
@@ -56,7 +57,6 @@ class DivisionDisplayCount : FrameLayout {
             val rc:RecyclerView? = layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
             rc?.adapter = MyRecycler()
             rc?.layoutManager = GridLayoutManager(context, grid, GridLayoutManager.VERTICAL, false)
-
             //Log.d("TAG", rc?.width.toString() + " " + dpWidth.toString() + " " + "" + (28 * grid) + " " + padding)
         }
 
@@ -89,13 +89,18 @@ class DivisionDisplayCount : FrameLayout {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val v= DataBindingUtil.inflate<DivisionMpBlockBinding>(LayoutInflater.from(parent.context), R.layout.division_mp_block, parent, false)
-            val vh = ViewHolder(v)
+            val vh = ViewHolder(v, "")
             return vh
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.block.setBackgroundColor(Color.RED)
             var id = MainActivity.model.ck[votes?.get(position)!!.asString].asJsonObject.get("mp_party_no").toString().replace("\"", "")
+            var mid = MainActivity.model.ck[votes?.get(position)!!.asString].asJsonObject.get("mp_id").toString().replace("\"", "")
+            holder.block.tag = mid
+            holder.block.setOnClickListener {
+                v -> Updater.mpClicked(v.tag.toString())
+            }
             holder.block.setBackgroundColor(if(id=="15") resources.getColor(R.color.lab)
             else if(id=="29") resources.getColor(R.color.snp) // SNP
             else if(id=="17") resources.getColor(R.color.lib) // Lib
@@ -111,7 +116,8 @@ class DivisionDisplayCount : FrameLayout {
             return if(votes!=null) votes!!.size() else 0
         }
 
-        inner class ViewHolder(itemView: DivisionMpBlockBinding) : RecyclerView.ViewHolder(itemView.root) {
+        inner class ViewHolder(itemView: DivisionMpBlockBinding, id:String)
+            : RecyclerView.ViewHolder(itemView.root){
             val block: View = itemView.divisionMpBlockView
         }
     }

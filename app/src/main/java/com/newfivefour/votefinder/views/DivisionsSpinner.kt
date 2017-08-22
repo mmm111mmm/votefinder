@@ -14,7 +14,7 @@ import com.google.gson.JsonArray
 import com.newfivefour.votefinder.R
 import android.widget.AdapterView.OnItemSelectedListener
 import com.newfivefour.votefinder.MainActivity
-import com.newfivefour.votefinder.Utils
+import com.newfivefour.votefinder.Updater
 
 
 class DivisionsSpinner : FrameLayout {
@@ -35,7 +35,7 @@ class DivisionsSpinner : FrameLayout {
                         override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, id: Long) {
                             if(MainActivity.model.division_select_number != pos) {
                                 MainActivity.model.division_select_number = pos
-                                Utils.updateBill()
+                                Updater.updateBill()
                             }
                         }
                         override fun onNothingSelected(parent: AdapterView<*>) {}
