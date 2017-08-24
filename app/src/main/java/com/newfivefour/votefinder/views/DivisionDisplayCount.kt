@@ -25,31 +25,36 @@ import com.newfivefour.votefinder.databinding.DivisionMpBlockBinding
 
 
 class DivisionDisplayCount : FrameLayout {
-    val model = Model()
+    private val model = Model()
+    private var dpWidth: Float = 0f
 
     constructor(context: Context) : super(context) { init(null, 0) }
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init(attrs, 0) }
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init(attrs, defStyle) }
 
+    val lab = resources.getColor(R.color.lab)
+    val snp = resources.getColor(R.color.snp) // SNP
+    val lib = resources.getColor(R.color.lib) // Lib
+    val sinn = resources.getColor(R.color.sinn) // Sinn Fein
+    val dup = resources.getColor(R.color.dup) // DUP
+    val cons = resources.getColor(R.color.cons) // Cons
+    val green = resources.getColor(R.color.green) // Green
+    val plaid = resources.getColor(R.color.plaid) // Plaid
+    val unknown = resources.getColor(R.color.unknown_party)
+    var size:Int = 0
     var layout:View? = null
     var title:String? = ""
         set(value) {
             val tv:TextView? = layout?.findViewById<TextView>(R.id.division_display_count_title_textview)
             tv?.text = value
         }
-    var votes:JsonArray? = JsonArray()
+    var votes:List<String>? = listOf("")
         set(value) {
             field = value
+            size = value?.size ?: 0
 
-            Log.d("TAG in votes", value?.size().toString())
+            Log.d("TAG in votes", "" +value?.size ?: "0")
 
-            val act = layout?.context as Activity
-            val display = act.windowManager.defaultDisplay
-            val outMetrics = DisplayMetrics()
-            display.getMetrics(outMetrics)
-
-            val density = resources.displayMetrics.density
-            val dpWidth = outMetrics.widthPixels / density
             val grid:Int = (dpWidth / 28).toInt()
             val padding = dpWidth - (26*grid)
             layout?.setPadding((padding/2).toInt(), 0, (padding/2).toInt(), 0)
@@ -57,7 +62,6 @@ class DivisionDisplayCount : FrameLayout {
             val rc:RecyclerView? = layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
             rc?.adapter = MyRecycler()
             rc?.layoutManager = GridLayoutManager(context, grid, GridLayoutManager.VERTICAL, false)
-            //Log.d("TAG", rc?.width.toString() + " " + dpWidth.toString() + " " + "" + (28 * grid) + " " + padding)
         }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
@@ -69,6 +73,13 @@ class DivisionDisplayCount : FrameLayout {
         this.layout = layoutInflator.inflate(R.layout.division_display_count, this)
         layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
                 ?.isNestedScrollingEnabled = false
+
+        val outMetrics = DisplayMetrics()
+        val act = layout?.context as Activity
+        val display = act.windowManager.defaultDisplay
+        display.getMetrics(outMetrics)
+        val density = resources.displayMetrics.density
+        this.dpWidth = outMetrics.widthPixels / density
     }
 
     public override fun onRestoreInstanceState(state: Parcelable) {
@@ -89,36 +100,36 @@ class DivisionDisplayCount : FrameLayout {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val v= DataBindingUtil.inflate<DivisionMpBlockBinding>(LayoutInflater.from(parent.context), R.layout.division_mp_block, parent, false)
-            val vh = ViewHolder(v, "")
+            val vh = ViewHolder(v)
             return vh
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.block.setBackgroundColor(Color.RED)
-            var id = MainActivity.model.ck[votes?.get(position)!!.asString].asJsonObject.get("mp_party_no").toString().replace("\"", "")
-            var mid = MainActivity.model.ck[votes?.get(position)!!.asString].asJsonObject.get("mp_id").toString().replace("\"", "")
-            holder.block.tag = mid
-            holder.block.setOnClickListener {
-                v -> Updater.mpClicked(v.tag.toString())
+            val id = MainActivity.model.party_nums[votes!![position]]
+            holder.root.setOnClickListener { _ ->
+                val id = MainActivity.model.ck[votes!![position]]?.get("mp_id").toString()
+                Updater.mpClicked(id.removeSurrounding("\""))
             }
-            holder.block.setBackgroundColor(if(id=="15") resources.getColor(R.color.lab)
-            else if(id=="29") resources.getColor(R.color.snp) // SNP
-            else if(id=="17") resources.getColor(R.color.lib) // Lib
-            else if(id=="30") resources.getColor(R.color.sinn) // Sinn Fein
-            else if(id=="7") resources.getColor(R.color.dup) // DUP
-            else if(id=="4") resources.getColor(R.color.cons) // Cons
-            else if(id=="44") resources.getColor(R.color.green) // Green
-            else if(id=="22") resources.getColor(R.color.plaid) // Plaid
-            else resources.getColor(R.color.unknown_party))
+            holder.root.setBackgroundColor(
+                when(id) {
+                    15 -> lab
+                    29 -> snp
+                    17 -> lib
+                    30 -> sinn
+                    7 -> dup
+                    4 -> cons
+                    44 -> green
+                    22 -> plaid
+                    else -> unknown })
         }
 
         override fun getItemCount():Int {
-            return if(votes!=null) votes!!.size() else 0
+            return size
         }
 
-        inner class ViewHolder(itemView: DivisionMpBlockBinding, id:String)
+        inner class ViewHolder(itemView: DivisionMpBlockBinding)
             : RecyclerView.ViewHolder(itemView.root){
-            val block: View = itemView.divisionMpBlockView
+            val root:View = itemView.root
         }
     }
 }

@@ -6,6 +6,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 
 class Model : BaseObservable() {
+
     var error: Boolean = false
         @Bindable get() = field
         set(value) {
@@ -36,7 +37,7 @@ class Model : BaseObservable() {
             field = value
             notifyPropertyChanged(BR.division_select_number)
         }
-    var allvotes: JsonArray = JsonArray()
+    var allvotes = listOf<List<String>>()
         @Bindable get() = field
         set(value) {
             field = value
@@ -54,7 +55,7 @@ class Model : BaseObservable() {
             field = value
             notifyPropertyChanged(BR.show_about)
         }
-    var uin = ""
+    var uin = "CD:2017-07-17:275"
     var profile = ""
     var constituency = JsonObject()
         @Bindable get() = field
@@ -62,6 +63,7 @@ class Model : BaseObservable() {
             field = value
             notifyPropertyChanged(BR.constituency)
         }
-    var ck = JsonObject()
+    var ck = hashMapOf<String, JsonObject>()
+    var party_nums = hashMapOf<String, Int>()
     var division = JsonObject()
 }

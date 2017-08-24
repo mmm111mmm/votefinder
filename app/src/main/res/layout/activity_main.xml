@@ -39,152 +39,153 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true">
-
-            <android.support.constraint.ConstraintLayout
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:context="com.example.user.votefinder.com.example.user.votefinder.MainActivity">
+                android:clickable="true"
+                android:focusable="true">
 
-                <TextView
-                    android:id="@+id/division_title_textview"
-                    android:layout_width="wrap_content"
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text='@{(model.divisions.size>0) ? model.divisions.get(model.division_select_number).asJsonObject.get("name").toString() : "hmm"}' />
+                    tools:context="com.example.user.votefinder.com.example.user.votefinder.MainActivity">
 
-                <LinearLayout
-                    android:id="@+id/divisions_spinner_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="1.0"
-                    app:layout_constraintTop_toBottomOf="@id/division_title_textview">
-
-                    <Button
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/division_title_textview"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.1"
-                        android:clickable="true"
-                        android:onClick="@{() -> utils.changeBill(-1)}"
-                        android:text="back" />
+                        android:text='@{(model.divisions.size>0) ? model.divisions.get(model.division_select_number).asJsonObject.get("name").toString() : "hmm"}' />
 
-                    <com.newfivefour.votefinder.views.DivisionsSpinner
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:id="@+id/divisions_spinner_layout"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.8"
-                        app:divisions="@{model.divisions}"
-                        app:selected="@{model.division_select_number}"></com.newfivefour.votefinder.views.DivisionsSpinner>
+                        android:orientation="horizontal"
+                        android:weightSum="1.0"
+                        app:layout_constraintTop_toBottomOf="@id/division_title_textview">
 
-                    <Button
-                        android:layout_width="0dp"
+                        <Button
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.1"
+                            android:clickable="true"
+                            android:enabled="@{model.division_select_number != 0}"
+                            android:onClick="@{() -> utils.changeBill(-1)}"
+                            android:text='b' />
+
+                        <com.newfivefour.votefinder.views.DivisionsSpinner
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.8"
+                            app:divisions="@{model.divisions}"
+                            app:selected="@{model.division_select_number}" />
+
+                        <Button
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.1"
+                            android:clickable="true"
+                            android:enabled="@{model.divisions.size-1 != model.division_select_number}"
+                            android:onClick="@{() -> utils.changeBill(1)}"
+                            android:text='f' />
+                    </LinearLayout>
+
+                    <com.newfivefour.votefinder.views.DivisionDisplayCount
+                        android:id="@+id/divisions_aye"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.1"
-                        android:clickable="true"
-                        android:onClick="@{() -> utils.changeBill(1)}"
-                        android:text="forward" />
-                </LinearLayout>
+                        app:layout_constraintTop_toBottomOf="@id/divisions_spinner_layout"
+                        app:title='@{(model.allvotes.size>0) ? "Ayes ("+model.allvotes.get(0).size+")" : ""}'
+                        app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(0) : null}" />
 
-                <com.newfivefour.votefinder.views.DivisionDisplayCount
-                    android:id="@+id/divisions_aye"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/divisions_spinner_layout"
-                    app:title='@{(model.allvotes.size>0) ? "Ayes ("+model.allvotes.get(0).asJsonArray.size+")" : ""}'
-                    app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(0).asJsonArray : null}" />
+                    <com.newfivefour.votefinder.views.DivisionDisplayCount
+                        android:id="@+id/divisions_no"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/divisions_aye"
+                        app:title='@{(model.allvotes.size>0) ? "Noes ("+model.allvotes.get(1).size+")" : ""}'
+                        app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(1) : null}" />
 
-                <com.newfivefour.votefinder.views.DivisionDisplayCount
-                    android:id="@+id/divisions_no"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/divisions_aye"
-                    app:title='@{(model.allvotes.size>0) ? "Noes ("+model.allvotes.get(1).asJsonArray.size+")" : ""}'
-                    app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(1).asJsonArray : null}" />
+                    <com.newfivefour.votefinder.views.DivisionDisplayCount
+                        android:id="@+id/divisions_absent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/divisions_no"
+                        app:title='@{(model.allvotes.size>0) ? "Absent ("+model.allvotes.get(2).size+")" : ""}'
+                        app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(2) : null}" />
 
-                <com.newfivefour.votefinder.views.DivisionDisplayCount
-                    android:id="@+id/divisions_absent"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/divisions_no"
-                    app:title='@{(model.allvotes.size>0) ? "Absent ("+model.allvotes.get(2).asJsonArray.size+")" : ""}'
-                    app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(2).asJsonArray : null}" />
+                    <com.newfivefour.votefinder.views.DivisionDisplayCount
+                        android:id="@+id/divisions_hadnotentered"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/divisions_absent"
+                        app:title='@{(model.allvotes.size>0) ? "Had not entered parliament ("+model.allvotes.get(3).size+")" : ""}'
+                        app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(3) : null}" />
 
-                <com.newfivefour.votefinder.views.DivisionDisplayCount
-                    android:id="@+id/divisions_hadnotentered"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/divisions_absent"
-                    app:title='@{(model.allvotes.size>0) ? "Had not entered parliament ("+model.allvotes.get(3).asJsonArray.size+")" : ""}'
-                    app:votes="@{(model.allvotes.size>0) ? model.allvotes.get(3).asJsonArray : null}" />
+                </android.support.constraint.ConstraintLayout>
 
-            </android.support.constraint.ConstraintLayout>
-
-        </ScrollView>
+            </ScrollView>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{model.error ? View.VISIBLE : View.GONE}"
+                android:layout_alignParentBottom="true"
                 android:background="#a00"
-                android:layout_alignParentBottom="true">
+                android:visibility="@{model.error ? View.VISIBLE : View.GONE}">
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text="There has been an error. Sorrow."
                     android:textAlignment="center"
-                    android:textColor="#aaa"
-                    android:text="There has been an error. Sorrow."/>
+                    android:textColor="#aaa" />
             </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:background="#ddd"
-            android:orientation="vertical"
-            android:padding="20dp"
-            android:visibility="@{model.show_about ? View.VISIBLE : View.GONE }"
-            android:layout_centerInParent="true"
-            tools:visibility="visible">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:onClick="@{() -> utils.showAbout(false) }"
-                android:text="x" />
+            <com.newfivefour.votefinder.views.DetailsBox
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                app:show="@{model.show_profile}" />
 
-            <TextView
+            <RelativeLayout
+                android:visibility="@{model.loading ? View.VISIBLE : View.GONE}"
+                android:background="#bbffffff"
+                android:layout_centerInParent="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    />
+            </RelativeLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="This shows the ayes, noes and absentees for any parliamentary vote with links to the text and video of the debate." />
+                android:layout_centerInParent="true"
+                android:layout_margin="20dp"
+                android:background="#ddd"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:visibility="@{model.show_about ? View.VISIBLE : View.GONE }"
+                tools:visibility="visible">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="And it shows MP profiles including phone numbers, fax, twitter, parliamentary posts, committees" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="This shows the ayes, noes and absentees for any parliamentary vote with links to the text and video of the debate." />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Contains data from explore.data.gov.uk" />
-        </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="And it shows MP profiles including phone numbers, fax, twitter, parliamentary posts, committees" />
 
-        <com.newfivefour.votefinder.views.DetailsBox
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            app:show="@{model.show_profile}" />
-
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="@{model.loading ? View.VISIBLE : View.GONE}"
-            />
-
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Contains data from explore.data.gov.uk" />
+            </LinearLayout>
         </RelativeLayout>
 
     </LinearLayout>

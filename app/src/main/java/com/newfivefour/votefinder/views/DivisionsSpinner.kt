@@ -34,8 +34,7 @@ class DivisionsSpinner : FrameLayout {
                     object : OnItemSelectedListener {
                         override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, id: Long) {
                             if(MainActivity.model.division_select_number != pos) {
-                                MainActivity.model.division_select_number = pos
-                                Updater.updateBill()
+                                Updater.changeBillExactNumber(pos)
                             }
                         }
                         override fun onNothingSelected(parent: AdapterView<*>) {}
