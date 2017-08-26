@@ -1,7 +1,5 @@
 package com.newfivefour.votefinder
 
-import android.support.annotation.NonNull
-import android.util.Log
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import io.reactivex.Observable
@@ -20,79 +18,51 @@ object EndPoints {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()!!
 
+    fun <T> repoWithLoadingAndErrorHandler(o:Observable<T>, loading: Boolean = true):Observable<T> {
+       return Observable.just("").flatMap {
+           if(loading) MainActivity.model.loading++
+           MainActivity.model.error = false
+           o.doOnError {
+               MainActivity.model.error = true
+           }
+           o.doAfterTerminate{
+               if(loading) MainActivity.model.loading--;
+           }
+           .subscribeOn(Schedulers.newThread())
+                   .observeOn(Schedulers.newThread())
+        }
+       .subscribeOn(Schedulers.newThread())
+               .observeOn(Schedulers.newThread())
+    }
+
     interface DivisionsList { @GET("/divisions") fun divisions(): Observable<JsonArray> }
-    val divisionListObservable: Observable<JsonArray> = repo.create(DivisionsList::class.java)
-        .divisions()
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-    fun divisionsList(@NonNull f: (JsonArray) -> Unit) =
-            divisionListObservable
-                    .onErrorReturn {
-                        e ->
-                        MainActivity.model.loading = false
-                        MainActivity.model.error = true
-                        Log.d("HI in dl", ""+e)
-                        JsonArray()
-                    }
-                    .subscribe(f)
+    fun divisionListObservable(): Observable<JsonArray> =
+            repoWithLoadingAndErrorHandler(repo.create(DivisionsList::class.java).divisions())
 
     interface DivisionDetails { @GET("/vote") fun division(@Query("uin") uin: String): Observable<JsonObject> }
-    fun divisionsDetailsObservable(uin:String):Observable<JsonObject> = repo.create(DivisionDetails::class.java)
-        .division(uin)
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-    fun divisionDetails(uin:String):Observable<JsonObject> {
-        MainActivity.model.loading = true
-        return divisionsDetailsObservable(uin)
-            .onErrorReturn {
-                MainActivity.model.loading = false
-                MainActivity.model.error = true
-                JsonObject()
-            }
-    }
+    fun divisionsDetailsObservable(uin:String):Observable<JsonObject> =
+            repoWithLoadingAndErrorHandler(repo.create(DivisionDetails::class.java).division(uin))
 
     interface MPsList { @GET("/mps") fun mps(): Observable<JsonArray> }
-    val mpsObservable: Observable<JsonArray> = repo.create(MPsList::class.java)
-        .mps()
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-    //fun mps(f: (JsonArray) -> Unit) = mpsObservable.subscribe(f)
+    fun mpsObservable(): Observable<JsonArray> =
+            repoWithLoadingAndErrorHandler(repo.create(MPsList::class.java).mps())
 
     interface MPDetails { @GET("/mp_details") fun details(@Query("id") id:String): Observable<JsonObject> }
-    fun mpDetails(mpid:String):Observable<JsonObject> {
-        return repo.create(MPDetails::class.java)
-                .details(mpid)
-                .doOnError {
-                    MainActivity.model.loading = false
-                    MainActivity.model.error = true
-                }
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-    }
+    fun mpDetails(mpid:String):Observable<JsonObject> =
+            repoWithLoadingAndErrorHandler(repo.create(MPDetails::class.java) .details(mpid))
+
 
     interface ConstituencySearch { @GET("/name") fun details(@Query("name") name:String): Observable<JsonArray> }
-    fun constituencySearch(f: (JsonArray) -> Unit) =
-        repo.create(ConstituencySearch::class.java)
-                .details("Oxford")
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(f)
+    fun constituencySearch() =
+        repoWithLoadingAndErrorHandler(repo.create(ConstituencySearch::class.java).details("Oxford"))
 
     interface ConstituencyDetail { @GET("/id") fun details(@Query("id") name:String): Observable<JsonObject> }
-    fun constitucyDetails(f: (JsonObject) -> Unit) =
-        repo.create(ConstituencyDetail::class.java)
-                .details("E14000807")
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(f)
+    fun constitucyDetails() =
+        repoWithLoadingAndErrorHandler(repo.create(ConstituencyDetail::class.java).details("E14000807"))
 
     interface PostcodeToLatLon{ @GET("/pc_lat_lon") fun details(@Query("postcode") name:String): Observable<JsonObject> }
-    fun postcodeToLatLon(f: (JsonObject) -> Unit) =
-        repo.create(PostcodeToLatLon::class.java)
-                .details("M401DB")
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(f)
+    fun postcodeToLatLon() =
+        repoWithLoadingAndErrorHandler(repo.create(PostcodeToLatLon::class.java).details("M401DB"))
 
 
 }

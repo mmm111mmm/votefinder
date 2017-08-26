@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.newfivefour.votefinder.databinding.ActivityMainBinding
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
@@ -17,11 +18,6 @@ class MainActivity : AppCompatActivity() {
         fun saveBackstack(f: (m:Model) -> Unit) = backstack.add(f)
     }
 
-    override fun onBackPressed() {
-        if(backstack.size>0) backstack.removeAt(backstack.size-1)(MainActivity.model)
-        else super.onBackPressed()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
@@ -29,46 +25,35 @@ class MainActivity : AppCompatActivity() {
         binding.model = model
         binding.utils = Updater
 
-        MainActivity.model.loading = true
-        EndPoints.mpsObservable
-            .map {
+        MainActivity.model.loading++
+        EndPoints.divisionListObservable()
+            .flatMap {
+                model.divisions = it
+                EndPoints.mpsObservable()
+            }.flatMap {
                 Log.d("TAG", "mps found")
                 model.constituencies = it
                 model.ck.clear()
                 it.forEach {
-                    model.ck.put(it.asJsonObject.get("mp_id").toString().removeSurrounding("\""), it.asJsonObject)
+                    model.ck.put(it.asJsonObject.get("mp_id").toString().removeSurrounding("\""),
+                            it.asJsonObject)
                 }
                 it.forEach {
                     model.party_nums.put(it.asJsonObject.get("mp_id").toString().removeSurrounding("\""),
                             it.asJsonObject.get("mp_party_no").toString().removeSurrounding("\"").toInt())
                 }
-            }
-            .observeOn(Schedulers.newThread())
-            .flatMap { EndPoints.divisionDetails("CD:2017-07-17:275") }
-            .observeOn(Schedulers.newThread())
-            .map { Updater.changeBillSquares(it.asJsonObject) }
-            .subscribe {
-                MainActivity.model.loading = false
-                MainActivity.model.error = true
-            }
+                EndPoints.divisionsDetailsObservable("CD:2017-07-17:275")
+            }.map {
+                Updater.changeBillSquares(it.asJsonObject)
+                MainActivity.model.loading--
+            }.subscribe({},{})
 
-        EndPoints.divisionsList { model.divisions = it }
 
-        /*
-        // gb postcode finder
+    }
 
-        EndPoints.constituencySearch {
-            Log.d("TAG", it.toString())
-        }
-
-        EndPoints.constitucyDetails {
-            Log.d("TAG", it.toString())
-        }
-
-        EndPoints.postcodeToLatLon {
-            Log.d("TAG", it.toString())
-        }
-        */
+    override fun onBackPressed() {
+        if(backstack.size>0) backstack.removeAt(backstack.size-1)(MainActivity.model)
+        else super.onBackPressed()
     }
 
     override fun onCreateOptionsMenu(menu: Menu):Boolean {
@@ -80,4 +65,5 @@ class MainActivity : AppCompatActivity() {
         if(item?.itemId == R.id.action_refresh) Updater.showAbout(true)
         return super.onOptionsItemSelected(item)
     }
+
 }

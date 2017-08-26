@@ -45,6 +45,7 @@
                 android:clickable="true"
                 android:focusable="true">
 
+
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -68,7 +69,6 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.1"
-                            android:clickable="true"
                             android:enabled="@{model.division_select_number != 0}"
                             android:onClick="@{() -> utils.changeBill(-1)}"
                             android:text='b' />
@@ -84,7 +84,6 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.1"
-                            android:clickable="true"
                             android:enabled="@{model.divisions.size-1 != model.division_select_number}"
                             android:onClick="@{() -> utils.changeBill(1)}"
                             android:text='f' />
@@ -148,7 +147,7 @@
                 app:show="@{model.show_profile}" />
 
             <RelativeLayout
-                android:visibility="@{model.loading ? View.VISIBLE : View.GONE}"
+                android:visibility="@{model.loading > 0 ? View.VISIBLE : View.GONE}"
                 android:background="#bbffffff"
                 android:layout_centerInParent="true"
                 android:layout_width="match_parent"

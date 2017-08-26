@@ -13,7 +13,7 @@ class Model : BaseObservable() {
             field = value
             notifyPropertyChanged(BR.error)
         }
-    var loading: Boolean = false
+    var loading: Int = 0
         @Bindable get() = field
         set(value) {
             field = value

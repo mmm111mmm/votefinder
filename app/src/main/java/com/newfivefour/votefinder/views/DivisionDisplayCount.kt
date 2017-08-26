@@ -25,21 +25,20 @@ import com.newfivefour.votefinder.databinding.DivisionMpBlockBinding
 
 
 class DivisionDisplayCount : FrameLayout {
-    private val model = Model()
-    private var dpWidth: Float = 0f
 
     constructor(context: Context) : super(context) { init(null, 0) }
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) { init(attrs, 0) }
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) { init(attrs, defStyle) }
 
+    var dpWidth: Float = 0f
     val lab = resources.getColor(R.color.lab)
-    val snp = resources.getColor(R.color.snp) // SNP
-    val lib = resources.getColor(R.color.lib) // Lib
-    val sinn = resources.getColor(R.color.sinn) // Sinn Fein
-    val dup = resources.getColor(R.color.dup) // DUP
-    val cons = resources.getColor(R.color.cons) // Cons
-    val green = resources.getColor(R.color.green) // Green
-    val plaid = resources.getColor(R.color.plaid) // Plaid
+    val snp = resources.getColor(R.color.snp)
+    val lib = resources.getColor(R.color.lib)
+    val sinn = resources.getColor(R.color.sinn)
+    val dup = resources.getColor(R.color.dup)
+    val cons = resources.getColor(R.color.cons)
+    val green = resources.getColor(R.color.green)
+    val plaid = resources.getColor(R.color.plaid)
     val unknown = resources.getColor(R.color.unknown_party)
     var size:Int = 0
     var layout:View? = null
@@ -56,7 +55,7 @@ class DivisionDisplayCount : FrameLayout {
             Log.d("TAG in votes", "" +value?.size ?: "0")
 
             val grid:Int = (dpWidth / 28).toInt()
-            val padding = dpWidth - (26*grid)
+            val padding = dpWidth - (24*grid)
             layout?.setPadding((padding/2).toInt(), 0, (padding/2).toInt(), 0)
 
             val rc:RecyclerView? = layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
@@ -80,20 +79,6 @@ class DivisionDisplayCount : FrameLayout {
         display.getMetrics(outMetrics)
         val density = resources.displayMetrics.density
         this.dpWidth = outMetrics.widthPixels / density
-    }
-
-    public override fun onRestoreInstanceState(state: Parcelable) {
-        if (state is Bundle) {
-            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
-            return
-        }
-        super.onRestoreInstanceState(state)
-    }
-
-    public override fun onSaveInstanceState(): Parcelable? {
-        val bundle = Bundle()
-        bundle.putParcelable("instanceState", super.onSaveInstanceState())
-        return bundle
     }
 
     inner class MyRecycler : RecyclerView.Adapter<MyRecycler.ViewHolder>() {
@@ -132,4 +117,19 @@ class DivisionDisplayCount : FrameLayout {
             val root:View = itemView.root
         }
     }
+
+    public override fun onRestoreInstanceState(state: Parcelable) {
+        if (state is Bundle) {
+            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+            return
+        }
+        super.onRestoreInstanceState(state)
+    }
+
+    public override fun onSaveInstanceState(): Parcelable? {
+        val bundle = Bundle()
+        bundle.putParcelable("instanceState", super.onSaveInstanceState())
+        return bundle
+    }
+
 }

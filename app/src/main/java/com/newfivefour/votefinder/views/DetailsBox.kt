@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import com.newfivefour.votefinder.R
 import com.newfivefour.votefinder.databinding.*
 import com.newfivefour.votefinder.MainActivity
@@ -24,9 +23,8 @@ class DetailsBox: FrameLayout {
     var show:Boolean = false
         set(value) {
             field = value
-            val paddingLeft = binding!!.root.paddingLeft.toFloat()
+            val paddingLeft = (binding!!.mpDetailsLinearlayout.layoutParams as FrameLayout.LayoutParams).leftMargin.toFloat()
             val offscreenX = binding!!.root.width.toFloat() * -1
-            Log.d("HI", ""+value+" " + binding!!.root.x)
             if(value && binding!!.root.x == offscreenX) {
                 ObjectAnimator.ofFloat(binding!!.root, "x", offscreenX, paddingLeft).start()
             } else if(!value && binding!!.root.x == paddingLeft){
@@ -44,8 +42,8 @@ class DetailsBox: FrameLayout {
         viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 viewTreeObserver.removeOnGlobalLayoutListener(this)
-                binding!!.root.x = (binding!!.root.width * -1).toFloat()
-                binding!!.root.invalidate()
+                binding.root.x = (binding.root.width * -1).toFloat()
+                binding.root.invalidate()
             }
         })
     }

@@ -1,29 +1,68 @@
 package com.newfivefour.votefinder
 
 import android.util.Log
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
+import android.view.View
+import com.google.gson.*
 import io.reactivex.Observable
+import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import org.joda.time.DateTime
 
 object Updater {
 
+    fun listOf(element: JsonElement?) : List<String> {
+        if(element == null) return listOf("")
+        else {
+            return element.asJsonArray!!.map {
+                it.asJsonObject.get("Name").toString().removeSurrounding("\"")
+            }
+        }
+    }
+
+    fun isThere(element: JsonElement?) : Int {
+        if(element is JsonArray && element.asJsonArray.size() > 0
+                && element.asJsonArray.get(0).toString()!="null") {
+            return View.VISIBLE
+        } else if(element is JsonPrimitive && element.toString().removeSurrounding("\"").isEmpty()) {
+            return View.VISIBLE
+        } else {
+            return View.GONE
+        }
+    }
+
+    fun extract(element: JsonElement?) : String {
+        if(element is JsonArray && element.asJsonArray.size() > 0) {
+            val item = element.asJsonArray?.get(0)
+            val value = if(item!!.isJsonPrimitive) item.toString().removeSurrounding("\"")
+            else if(item.isJsonArray) item.asJsonArray.map { it.toString().removeSurrounding("\"") }.joinToString(",")
+            else ""
+            return if(value == "null") "" else value
+        } else if(!element.toString().removeSurrounding("\"").isEmpty()){
+            return element.toString().removeSurrounding("\"")
+        } else
+            return ""
+    }
+
+    fun postsExtract(element: JsonElement?) : String {
+        if(element == null) return ""
+        else {
+            return element.asJsonArray!!.map {
+                it.asJsonObject.get("Name").toString().removeSurrounding("\"")
+            }.joinToString(", ")
+        }
+    }
+
     fun showAbout(b: Boolean) {
         if (b) MainActivity.saveBackstack { m -> m.show_about = !b }
         MainActivity.model.show_about = b
     }
 
-    fun updateMPModel(a: JsonObject) {
-        Log.d("TAG", a.toString())
-        MainActivity.model.loading = false
-        MainActivity.model.constituency = a
+    fun changeBill(i: Int) {
+        changeBillExactNumber(MainActivity.model.division_select_number + i)
     }
-
-    fun changeBill(i: Int) = changeBillExactNumber(MainActivity.model.division_select_number + i)
 
     fun changeBillExactNumber(pos: Int) {
         val allvotes = MainActivity.model.allvotes
@@ -36,28 +75,30 @@ object Updater {
         updateBill()
     }
 
-    fun mpClicked(id: String) {
-        Log.d("TAG", "Profile clicked")
-        EndPoints.mpDetails(id)
-                .map {
-                    updateMPModel(it)
-                    MainActivity.saveBackstack { m -> m.show_profile = false }
-                    MainActivity.model.show_profile = true
-                    MainActivity.model.loading = false
-                    MainActivity.model.error = false
-                }.subscribe()
-    }
-
     private fun updateBill() {
         Log.d("TAG", "bill change " + MainActivity.model.division_select_number)
         val uin = MainActivity.model.divisions.get(MainActivity.model.division_select_number)
                 .asJsonObject
                 .get("uin")
                 .asString
-        EndPoints.divisionDetails(uin)
-                .observeOn(Schedulers.newThread())
-                .map { changeBillSquares(it) }
-                .subscribe()
+        MainActivity.model.loading++
+        EndPoints.divisionsDetailsObservable(uin)
+        .map {
+            changeBillSquares(it)
+            MainActivity.model.loading--
+        }.subscribe({},{})
+    }
+
+    fun mpClicked(id: String) {
+        Log.d("TAG", "Profile clicked")
+        EndPoints.mpDetails(id)
+                .map {
+                    Log.d("HI", ""+it)
+                    MainActivity.model.constituency = it
+                    MainActivity.saveBackstack { m -> m.show_profile = false }
+                    MainActivity.model.show_profile = true
+                }
+                .subscribe({},{})
     }
 
     fun changeBillSquares(it: JsonObject) {
@@ -106,8 +147,6 @@ object Updater {
             MainActivity.model.division = vote
             MainActivity.model.allvotes = listOf(ayes, noes, absent, not_in_house)
         }
-        MainActivity.model.loading = false
-        MainActivity.model.error = false
     }
 
 }
