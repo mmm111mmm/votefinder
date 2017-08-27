@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         binding.utils = ViewUtils
         binding.updater = Updater
 
+        if(MainActivity.model.constituencies.size()==0) {
         MainActivity.model.loading++
         EndPoints.divisionListObservable()
             .flatMap {
@@ -56,12 +57,11 @@ class MainActivity : AppCompatActivity() {
             }.map {
                 Updater.changeBillSquares(it.asJsonObject)
             }.subscribe({
-           Log.d("HI", "hi")
             MainActivity.model.loading--
         },{
-            Log.d("HI", "hi")
             MainActivity.model.loading--
         })
+        }
     }
 
     override fun onBackPressed() {

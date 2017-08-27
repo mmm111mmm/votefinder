@@ -26,7 +26,7 @@ class DialogueBox: RelativeLayout {
         if(value) {
             visibility = View.VISIBLE
             ObjectAnimator.ofFloat(this, "alpha", 0f, 1.0f).start()
-            this.backstackPosition = MainActivity.saveBackstack { this.backAction.onClick(this) }
+            if(backstackPosition==-1) this.backstackPosition = MainActivity.saveBackstack { this.backAction.onClick(this) }
         } else {
             val a = ObjectAnimator.ofFloat(this, "alpha", 1.0f, 0.0f)
             a.addListener(object: Animation.AnimationListener, Animator.AnimatorListener {
@@ -55,13 +55,17 @@ class DialogueBox: RelativeLayout {
     }
 
     public override fun onRestoreInstanceState(state: Parcelable) = when(state) {
-        is Bundle -> super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+        is Bundle -> {
+            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+            backstackPosition = state.getInt("backstackPosition")
+        }
         else -> super.onRestoreInstanceState(state)
     }
 
     public override fun onSaveInstanceState(): Parcelable? {
         val bundle = Bundle()
         bundle.putParcelable("instanceState", super.onSaveInstanceState())
+        bundle.putInt("backstackPosition", backstackPosition)
         return bundle
     }
 

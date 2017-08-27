@@ -2,7 +2,6 @@ package com.newfivefour.votefinder.views
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -14,7 +13,6 @@ import android.view.View
 import com.newfivefour.votefinder.R
 import android.view.ViewGroup
 import android.util.DisplayMetrics
-import android.util.Log
 import android.widget.TextView
 import com.newfivefour.votefinder.MainActivity
 import android.databinding.DataBindingUtil
@@ -48,9 +46,7 @@ class DivisionDisplayCount : FrameLayout {
     var votes:List<String>? = listOf("")
         set(value) {
             field = value
-            size = value?.size ?: 0
-
-            Log.d("TAG in votes", "" +value?.size ?: "0")
+            this.size = value?.size ?: 0
 
             val grid:Int = (dpWidth / 28).toInt()
             val padding = dpWidth - (24*grid)
@@ -62,8 +58,7 @@ class DivisionDisplayCount : FrameLayout {
         }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
-        val a = context.obtainStyledAttributes(
-                attrs, R.styleable.DivisionDisplayCount, defStyle, 0)
+        val a = context.obtainStyledAttributes(attrs, R.styleable.DivisionDisplayCount, defStyle, 0)
         a.recycle()
 
         val layoutInflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -106,22 +101,16 @@ class DivisionDisplayCount : FrameLayout {
                     else -> unknown })
         }
 
-        override fun getItemCount():Int {
-            return size
-        }
+        override fun getItemCount():Int = size
 
-        inner class ViewHolder(itemView: DivisionMpBlockBinding)
-            : RecyclerView.ViewHolder(itemView.root){
+        inner class ViewHolder(itemView: DivisionMpBlockBinding) : RecyclerView.ViewHolder(itemView.root) {
             val root:View = itemView.root
         }
     }
 
-    public override fun onRestoreInstanceState(state: Parcelable) {
-        if (state is Bundle) {
-            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
-            return
-        }
-        super.onRestoreInstanceState(state)
+    public override fun onRestoreInstanceState(state: Parcelable) = when(state) {
+        is Bundle ->  super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+        else -> super.onRestoreInstanceState(state)
     }
 
     public override fun onSaveInstanceState(): Parcelable? {

@@ -153,6 +153,7 @@
         </RelativeLayout>
 
         <com.newfivefour.votefinder.views.DialogueBox
+            android:id="@+id/about_box"
             android:clickable="true"
             android:focusable="true"
             app:backAction="@{() -> updater.showAbout(false)}"

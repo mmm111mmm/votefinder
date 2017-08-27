@@ -30,7 +30,7 @@ class DetailsBox: FrameLayout {
             Log.d("HI", ""+binding!!.root.x+" "+value+" "+offscreenX)
             if(value && binding!!.root.y < 0) {
                 ObjectAnimator.ofFloat(binding!!.root, "y", offscreenX, 0f).start()
-                this.backstackPosition = MainActivity.saveBackstack { m -> m.show_profile = false }
+                if(backstackPosition==-1) backstackPosition = MainActivity.saveBackstack { m -> m.show_profile = false }
             } else if(!value && binding!!.root.y == 0f && offscreenX<0){
                 Log.d("HI", "animating off")
                 ObjectAnimator.ofFloat(binding!!.root, "y", 0f, offscreenX).start()
@@ -49,6 +49,7 @@ class DetailsBox: FrameLayout {
             override fun onGlobalLayout() {
                 viewTreeObserver.removeOnGlobalLayoutListener(this)
                 binding.root.y = (binding.root.height * -1).toFloat()
+                show = show
                 binding.root.invalidate()
             }
         })
@@ -58,13 +59,17 @@ class DetailsBox: FrameLayout {
     }
 
     override fun onRestoreInstanceState(state: Parcelable) = when(state) {
-        is Bundle -> super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+        is Bundle -> {
+            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+            backstackPosition = state.getInt("backstackPosition")
+        }
         else -> super.onRestoreInstanceState(state)
     }
 
     override fun onSaveInstanceState(): Parcelable? {
         val bundle = Bundle()
         bundle.putParcelable("instanceState", super.onSaveInstanceState())
+        bundle.putInt("backstackPosition", backstackPosition)
         return bundle
     }
 }
