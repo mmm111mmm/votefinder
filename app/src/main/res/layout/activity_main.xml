@@ -14,6 +14,10 @@
         <variable
             name="utils"
             type="com.newfivefour.votefinder.ViewUtils" />
+
+        <variable
+            name="updater"
+            type="com.newfivefour.votefinder.Updater" />
     </data>
 
     <RelativeLayout
@@ -50,7 +54,7 @@
                     android:paddingRight="6dp"
                     android:paddingTop="6dp"
                     android:minLines="3"
-                    android:text='@{(model.divisions.size>0) ? utils.extract(model.divisions.get(model.division_select_number).asJsonObject.get("name")) : "hmm"}' />
+                    android:text='@{(model.divisions.size>0) ? utils.title(model.divisions.get(model.division_select_number)) : ""}' />
 
                 <com.newfivefour.votefinder.views.DivisionsSpinner
                     android:id="@+id/invisibile_divisions_spinner"
@@ -148,6 +152,16 @@
                 android:layout_centerInParent="true" />
         </RelativeLayout>
 
+        <com.newfivefour.votefinder.views.DialogueBox
+            android:clickable="true"
+            android:focusable="true"
+            app:backAction="@{() -> updater.showAbout(false)}"
+            app:show="@{model.show_about}"
+            android:alpha="0.0"
+            tools:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -156,8 +170,7 @@
             android:background="#ddd"
             android:orientation="vertical"
             android:padding="20dp"
-            android:visibility="@{model.show_about ? View.VISIBLE : View.GONE }"
-            tools:visibility="visible">
+            >
 
             <TextView
                 android:layout_width="match_parent"
@@ -173,7 +186,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Contains data from explore.data.gov.uk" />
+
         </LinearLayout>
+
+        </com.newfivefour.votefinder.views.DialogueBox>
 
     </RelativeLayout>
 

@@ -55,6 +55,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textStyle="italic"
+                    android:text='@{utils.extract(model.constituency.get("name"))}' />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text='@{utils.extract(model.constituency.get("mp_party"))}' />
 
                 <TextView

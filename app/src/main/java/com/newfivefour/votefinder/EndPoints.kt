@@ -22,17 +22,17 @@ object EndPoints {
        return Observable.just("").flatMap {
            if(loading) MainActivity.model.loading++
            MainActivity.model.error = false
-           o.doOnError {
-               MainActivity.model.error = true
-           }
-           o.doAfterTerminate{
-               if(loading) MainActivity.model.loading--;
-           }
-           .subscribeOn(Schedulers.newThread())
-                   .observeOn(Schedulers.newThread())
+           o.subscribeOn(Schedulers.newThread())
+           .observeOn(Schedulers.newThread())
+        }
+        .doOnError {
+            MainActivity.model.error = true
+        }
+        .doOnTerminate {
+            if(loading) MainActivity.model.loading--
         }
        .subscribeOn(Schedulers.newThread())
-               .observeOn(Schedulers.newThread())
+       .observeOn(Schedulers.newThread())
     }
 
     interface DivisionsList { @GET("/divisions") fun divisions(): Observable<JsonArray> }

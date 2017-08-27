@@ -3,6 +3,7 @@ package com.newfivefour.votefinder
 import android.view.View
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 
 object ViewUtils {
@@ -48,5 +49,16 @@ object ViewUtils {
             }.joinToString(", ")
         }
     }
+
+    fun title(it: JsonElement): String {
+        val d = it.asJsonObject.get("uin").toString()
+                .removeSurrounding("\"")
+                .replace("CD:", "")
+                .replace(":...$".toRegex(), "")
+        val v = it.asJsonObject.get("name").toString().removeSurrounding("\"")
+        return "$v ($d)"
+    }
+
+    fun pravda(f: () -> Unit):Boolean { f(); return true }
 
 }

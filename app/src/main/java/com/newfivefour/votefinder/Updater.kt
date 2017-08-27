@@ -14,7 +14,6 @@ import org.joda.time.DateTime
 object Updater {
 
     fun showAbout(b: Boolean) {
-        if (b) MainActivity.saveBackstack { m -> m.show_about = !b }
         MainActivity.model.show_about = b
     }
 
@@ -44,8 +43,11 @@ object Updater {
         .map {
             MainActivity.model.billChanged++
             changeBillSquares(it)
+        }.subscribe({
             MainActivity.model.loading--
-        }.subscribe({},{})
+        },{
+            MainActivity.model.loading--
+        })
     }
 
     fun mpClicked(id: String) {

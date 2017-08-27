@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.newfivefour.votefinder.ViewUtils.pravda
 import com.newfivefour.votefinder.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -15,10 +16,11 @@ class MainActivity : AppCompatActivity() {
         val backstack:ArrayList<(m:Model) -> Unit> = arrayListOf()
         fun saveBackstack(f: (m:Model) -> Unit):Int {
             backstack.add(f)
+            Log.d("HI", "$backstack")
             return backstack.size
         }
         fun runBackstackFunction(position: Int) {
-            if(backstack.size >= position) backstack.removeAt(position-1)(MainActivity.model)
+            if(position>0 && backstack.size > position-1) backstack.removeAt(position-1)(MainActivity.model)
         }
         fun goBackInModel() {
             if(backstack.size > 0) backstack.removeAt(backstack.size-1)(MainActivity.model)
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.model = model
         binding.utils = ViewUtils
+        binding.updater = Updater
 
         MainActivity.model.loading++
         EndPoints.divisionListObservable()
@@ -52,30 +55,33 @@ class MainActivity : AppCompatActivity() {
                 EndPoints.divisionsDetailsObservable("CD:2017-07-17:275")
             }.map {
                 Updater.changeBillSquares(it.asJsonObject)
-                MainActivity.model.loading--
-            }.subscribe({},{})
+            }.subscribe({
+           Log.d("HI", "hi")
+            MainActivity.model.loading--
+        },{
+            Log.d("HI", "hi")
+            MainActivity.model.loading--
+        })
     }
 
     override fun onBackPressed() {
+        Log.d("HI", "Back pressed")
         if(backstack.size>0) goBackInModel()
         else super.onBackPressed()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu):Boolean {
+    override fun onCreateOptionsMenu(menu: Menu):Boolean = pravda {
         menuInflater.inflate(R.menu.menu, menu)
-        return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId) {
-            R.id.action_refresh -> Updater.showAbout(true)
-            R.id.action_forward ->
-                if(MainActivity.model.division_select_number<MainActivity.model.divisions.size()-1) Updater.changeBill(1)
-            R.id.action_back ->
-                if(MainActivity.model.division_select_number>0) Updater.changeBill(-1)
-            R.id.action_change->  MainActivity.model.changeBill = !MainActivity.model.changeBill
-        }
-        return super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean = when(item?.itemId) {
+        R.id.action_refresh -> pravda { Updater.showAbout(true) }
+        R.id.action_forward ->
+            pravda { if(MainActivity.model.division_select_number<MainActivity.model.divisions.size()-1) Updater.changeBill(1) }
+        R.id.action_back ->
+            pravda { if(MainActivity.model.division_select_number>0) Updater.changeBill(-1) }
+        R.id.action_change-> pravda { MainActivity.model.changeBill = !MainActivity.model.changeBill }
+        else -> super.onOptionsItemSelected(item)
     }
 
 }

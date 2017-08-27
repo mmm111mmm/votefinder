@@ -22,22 +22,27 @@ class DivisionsSpinner : FrameLayout {
     var layout:View? = null
     var divisions:JsonArray = JsonArray()
         set(value) {
-            val adapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item,
-                value.map { it.asJsonObject.get("name").asString }
+            val adapter = ArrayAdapter<String>(context, R.layout.divisions_spinner_item,
+                    android.R.id.text1,
+                value.map {
+                    val d = it.asJsonObject.get("uin").toString()
+                            .removeSurrounding("\"")
+                            .replace("CD:", "")
+                            .replace(":...$".toRegex(), "")
+                    val v = it.asJsonObject.get("name").toString().removeSurrounding("\"")
+                    "$d - $v"
+                }
             )
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            adapter.setDropDownViewResource(R.layout.divisions_spinner_item)
             this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.adapter = adapter
             this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.onItemSelectedListener =
                     object : OnItemSelectedListener {
                         override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, id: Long) {
                             if(MainActivity.model.division_select_number != pos) {
                                 Updater.changeBillExactNumber(pos)
-                                //layout?.findViewById<Spinner>(R.id.planets_spinner)?.visibility = View.GONE
                             }
                         }
-                        override fun onNothingSelected(parent: AdapterView<*>) {
-                            //layout?.findViewById<Spinner>(R.id.planets_spinner)?.visibility = View.GONE
-                        }
+                        override fun onNothingSelected(parent: AdapterView<*>) {}
                     }
 
         }
@@ -59,13 +64,12 @@ class DivisionsSpinner : FrameLayout {
         val layoutInflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         this.layout = layoutInflator.inflate(R.layout.divisions_spinner, this)
     }
-    public override fun onRestoreInstanceState(state: Parcelable) {
-        if (state is Bundle) {
-            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
-            return
-        }
-        super.onRestoreInstanceState(state)
+
+    public override fun onRestoreInstanceState(state: Parcelable) = when(state) {
+        is Bundle -> super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+        else -> super.onRestoreInstanceState(state)
     }
+
     public override fun onSaveInstanceState(): Parcelable? {
         val bundle = Bundle()
         bundle.putParcelable("instanceState", super.onSaveInstanceState())

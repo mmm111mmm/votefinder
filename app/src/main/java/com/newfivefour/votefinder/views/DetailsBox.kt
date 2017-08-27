@@ -57,12 +57,9 @@ class DetailsBox: FrameLayout {
         }
     }
 
-    override fun onRestoreInstanceState(state: Parcelable) {
-        if (state is Bundle) {
-            super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
-            return
-        }
-        super.onRestoreInstanceState(state)
+    override fun onRestoreInstanceState(state: Parcelable) = when(state) {
+        is Bundle -> super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+        else -> super.onRestoreInstanceState(state)
     }
 
     override fun onSaveInstanceState(): Parcelable? {
