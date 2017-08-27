@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
-            name="utils"
+            name="updater"
             type="com.newfivefour.votefinder.Updater" />
     </data>
         <View

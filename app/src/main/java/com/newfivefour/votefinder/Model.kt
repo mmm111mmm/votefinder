@@ -63,6 +63,18 @@ class Model : BaseObservable() {
             field = value
             notifyPropertyChanged(BR.constituency)
         }
+    var changeBill: Boolean = false
+        @Bindable get() = field
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.changeBill)
+        }
+    var billChanged: Int = 0
+        @Bindable get() = field
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.billChanged)
+        }
     var ck = hashMapOf<String, JsonObject>()
     var party_nums = hashMapOf<String, Int>()
     var division = JsonObject()

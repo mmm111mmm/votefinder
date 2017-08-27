@@ -11,14 +11,12 @@ import android.os.Parcelable
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import com.google.gson.JsonArray
 import com.newfivefour.votefinder.R
 import android.view.ViewGroup
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.TextView
 import com.newfivefour.votefinder.MainActivity
-import com.newfivefour.votefinder.Model
 import android.databinding.DataBindingUtil
 import com.newfivefour.votefinder.Updater
 import com.newfivefour.votefinder.databinding.DivisionMpBlockBinding

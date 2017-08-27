@@ -7,15 +7,22 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.newfivefour.votefinder.databinding.ActivityMainBinding
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
         val model = Model()
         val backstack:ArrayList<(m:Model) -> Unit> = arrayListOf()
-        fun saveBackstack(f: (m:Model) -> Unit) = backstack.add(f)
+        fun saveBackstack(f: (m:Model) -> Unit):Int {
+            backstack.add(f)
+            return backstack.size
+        }
+        fun runBackstackFunction(position: Int) {
+            if(backstack.size >= position) backstack.removeAt(position-1)(MainActivity.model)
+        }
+        fun goBackInModel() {
+            if(backstack.size > 0) backstack.removeAt(backstack.size-1)(MainActivity.model)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         setSupportActionBar(binding.toolbar)
         binding.model = model
-        binding.utils = Updater
+        binding.utils = ViewUtils
 
         MainActivity.model.loading++
         EndPoints.divisionListObservable()
@@ -47,12 +54,10 @@ class MainActivity : AppCompatActivity() {
                 Updater.changeBillSquares(it.asJsonObject)
                 MainActivity.model.loading--
             }.subscribe({},{})
-
-
     }
 
     override fun onBackPressed() {
-        if(backstack.size>0) backstack.removeAt(backstack.size-1)(MainActivity.model)
+        if(backstack.size>0) goBackInModel()
         else super.onBackPressed()
     }
 
@@ -62,7 +67,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if(item?.itemId == R.id.action_refresh) Updater.showAbout(true)
+        when(item?.itemId) {
+            R.id.action_refresh -> Updater.showAbout(true)
+            R.id.action_forward ->
+                if(MainActivity.model.division_select_number<MainActivity.model.divisions.size()-1) Updater.changeBill(1)
+            R.id.action_back ->
+                if(MainActivity.model.division_select_number>0) Updater.changeBill(-1)
+            R.id.action_change->  MainActivity.model.changeBill = !MainActivity.model.changeBill
+        }
         return super.onOptionsItemSelected(item)
     }
 

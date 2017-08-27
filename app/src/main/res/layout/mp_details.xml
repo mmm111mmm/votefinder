@@ -7,8 +7,12 @@
     <data>
 
         <variable
-            name="utils"
+            name="updater"
             type="com.newfivefour.votefinder.Updater" />
+
+        <variable
+            name="utils"
+            type="com.newfivefour.votefinder.ViewUtils" />
 
         <variable
             name="model"
@@ -19,20 +23,24 @@
         android:id="@+id/mp_details_linearlayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="20dp"
-        android:background="@android:color/holo_green_light"
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:padding="5dp"
         tools:ignore="ExtraText"
         tools:showIn="@layout/activity_main">
 
         <ScrollView
+            android:background="@android:color/holo_green_light"
+            android:padding="15dp"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/mp_details_main_content"
+                android:clickable="true"
+                android:focusable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -40,59 +48,128 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:text='@{utils.extract(model.constituency.get("mp_name"))}' />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textStyle="italic"
                     android:text='@{utils.extract(model.constituency.get("mp_party"))}' />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text='@{model.constituency.get("mp_parliaments").toString()}' />
+                    android:text='@{"Parliaments: " + model.constituency.get("mp_parliaments").toString()}' />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoLink="web"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_twitter"))}'
                     android:text='@{utils.extract(model.constituency.get("mp_twitter"))}' />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:autoLink="email"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_email"))}'
                     android:text='@{utils.extract(model.constituency.get("mp_email"))}' />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_parl_phone"))}'
-                    android:text='@{utils.extract(model.constituency.get("mp_parl_phone"))}' />
+                    android:orientation="horizontal">
 
-                <TextView
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text='Parliamentary phone: ' />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:autoLink="phone"
+                        android:text='@{utils.extract(model.constituency.get("mp_parl_phone"))}' />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_parl_fax"))}'
-                    android:text='@{utils.extract(model.constituency.get("mp_parl_fax"))}' />
+                    android:orientation="horizontal">
 
-                <TextView
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text='Parliamentary fax: ' />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text='@{utils.extract(model.constituency.get("mp_parl_fax"))}' />
+
+                </LinearLayout>
+
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_constit_phone"))}'
-                    android:text='@{utils.extract(model.constituency.get("mp_constit_phone"))}' />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text='Constituency phone: ' />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:autoLink="phone"
+                        android:text='@{utils.extract(model.constituency.get("mp_constit_phone"))}' />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility='@{utils.isThere(model.constituency.get("mp_constit_fax"))}'
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text='Constituency fax: ' />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text='@{utils.extract(model.constituency.get("mp_constit_fax"))}' />
+
+                </LinearLayout>
+
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility='@{utils.isThere(model.constituency.get("mp_constit_fax"))}'
-                    android:text='@{utils.extract(model.constituency.get("mp_constit_fax"))}' />
+                    android:textStyle="bold"
+                    android:visibility='@{utils.isThere(model.constituency.get("mp_constit_address"))}'
+                    android:text='Constituency address' />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_constit_address"))}'
                     android:text='@{utils.extract(model.constituency.get("mp_constit_address"))}' />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility='@{utils.isThere(model.constituency.get("mp_gov_posts"))}'
+                    android:text='Government posts' />
 
                 <com.newfivefour.votefinder.views.QuickRecyclerView
                     android:layout_width="match_parent"
@@ -101,6 +178,13 @@
                     app:items='@{utils.listOf(model.constituency.get("mp_gov_posts"))}'
                     />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility='@{utils.isThere(model.constituency.get("mp_committees"))}'
+                    android:text='Committees' />
+
                 <com.newfivefour.votefinder.views.QuickRecyclerView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -108,12 +192,26 @@
                     app:items='@{utils.listOf(model.constituency.get("mp_committees"))}'
                     />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility='@{utils.isThere(model.constituency.get("mp_parl_posts"))}'
+                    android:text='Parliamentary posts' />
+
                 <com.newfivefour.votefinder.views.QuickRecyclerView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility='@{utils.isThere(model.constituency.get("mp_parl_posts"))}'
                     app:items='@{utils.listOf(model.constituency.get("mp_parl_posts"))}'
                     />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:visibility='@{utils.isThere(model.constituency.get("mp_opp_posts"))}'
+                    android:text='Opposition posts' />
 
                 <com.newfivefour.votefinder.views.QuickRecyclerView
                     android:layout_width="match_parent"

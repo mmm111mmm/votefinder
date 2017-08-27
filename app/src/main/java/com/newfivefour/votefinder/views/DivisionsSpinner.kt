@@ -3,13 +3,10 @@ package com.newfivefour.votefinder.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.FrameLayout
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.*
 import com.google.gson.JsonArray
 import com.newfivefour.votefinder.R
 import android.widget.AdapterView.OnItemSelectedListener
@@ -35,15 +32,24 @@ class DivisionsSpinner : FrameLayout {
                         override fun onItemSelected(p: AdapterView<*>, v: View?, pos: Int, id: Long) {
                             if(MainActivity.model.division_select_number != pos) {
                                 Updater.changeBillExactNumber(pos)
+                                //layout?.findViewById<Spinner>(R.id.planets_spinner)?.visibility = View.GONE
                             }
                         }
-                        override fun onNothingSelected(parent: AdapterView<*>) {}
+                        override fun onNothingSelected(parent: AdapterView<*>) {
+                            //layout?.findViewById<Spinner>(R.id.planets_spinner)?.visibility = View.GONE
+                        }
                     }
 
         }
     var selected:Int = 0
         set(value) {
             this.layout?.findViewById<Spinner>(R.id.planets_spinner)?.setSelection(value)
+        }
+
+    var clicked:Boolean = false
+        set(value) {
+            field = value
+            layout?.findViewById<Spinner>(R.id.planets_spinner)!!.performClick()
         }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
