@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                     model.party_nums.put(it.asJsonObject.get("mp_id").toString().removeSurrounding("\""),
                             it.asJsonObject.get("mp_party_no").toString().removeSurrounding("\"").toInt())
                 }
-                EndPoints.divisionsDetailsObservable("CD:2017-07-17:275")
+                EndPoints.divisionsDetailsObservable(model.uin)
             }.map {
                 Updater.changeBillSquares(it.asJsonObject)
             }.subscribe({
@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             pravda { if(MainActivity.model.division_select_number<MainActivity.model.divisions.size()-1) Updater.changeBill(1) }
         R.id.action_back ->
             pravda { if(MainActivity.model.division_select_number>0) Updater.changeBill(-1) }
-        R.id.action_change-> pravda { MainActivity.model.changeBill = !MainActivity.model.changeBill }
         else -> super.onOptionsItemSelected(item)
     }
 

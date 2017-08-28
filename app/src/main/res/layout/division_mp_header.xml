@@ -6,10 +6,11 @@
             name="updater"
             type="com.newfivefour.votefinder.Updater" />
     </data>
-        <View
-            android:id="@+id/division_mp_block_view"
-            android:background="@color/colorAccent"
+        <TextView
+            android:id="@+id/division_mp_block_header_Textview"
+            android:clickable="true"
+            android:text="A header"
             android:layout_margin="2dp"
-            android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 </layout>

@@ -56,6 +56,7 @@ class Model : BaseObservable() {
             notifyPropertyChanged(BR.show_about)
         }
     var uin = "CD:2017-07-17:275"
+    fun date():String { return uin.replace("CD:","").replace(":...$".toRegex(), "") }
     var profile = ""
     var constituency = JsonObject()
         @Bindable get() = field

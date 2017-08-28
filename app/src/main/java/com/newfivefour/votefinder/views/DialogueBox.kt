@@ -50,6 +50,7 @@ class DialogueBox: RelativeLayout {
         a.recycle()
         setOnClickListener {
             MainActivity.runBackstackFunction(this.backstackPosition)
+            backstackPosition = -1
         }
         visibility = View.GONE
     }

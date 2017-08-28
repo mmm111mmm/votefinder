@@ -3,15 +3,23 @@ package com.newfivefour.votefinder
 import android.util.Log
 import android.view.View
 import com.google.gson.*
-import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.functions.BiFunction
-import io.reactivex.schedulers.Schedulers
 import org.joda.time.DateTime
+import android.content.Intent
+import android.net.Uri
+
 
 object Updater {
+
+    fun openUrl(v:View, url: String) {
+        val intent = Intent()
+        intent.action = Intent.ACTION_VIEW
+        intent.data = Uri.parse(url)
+        v.context.startActivity(intent)
+    }
+
+    fun showSpinner() {
+        MainActivity.model.changeBill = !MainActivity.model.changeBill
+    }
 
     fun showAbout(b: Boolean) {
         MainActivity.model.show_about = b
@@ -38,6 +46,7 @@ object Updater {
                 .asJsonObject
                 .get("uin")
                 .asString
+        MainActivity.model.uin = uin
         MainActivity.model.loading++
         EndPoints.divisionsDetailsObservable(uin)
         .map {

@@ -55,6 +55,7 @@ class DetailsBox: FrameLayout {
         })
         binding.mpDetailsLinearlayout.setOnClickListener {
             MainActivity.runBackstackFunction(this.backstackPosition)
+            backstackPosition = -1
         }
     }
 

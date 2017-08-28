@@ -13,11 +13,12 @@ import android.view.View
 import com.newfivefour.votefinder.R
 import android.view.ViewGroup
 import android.util.DisplayMetrics
-import android.widget.TextView
 import com.newfivefour.votefinder.MainActivity
 import android.databinding.DataBindingUtil
+import android.util.Log
 import com.newfivefour.votefinder.Updater
 import com.newfivefour.votefinder.databinding.DivisionMpBlockBinding
+import com.newfivefour.votefinder.databinding.DivisionMpHeaderBinding
 
 
 class DivisionDisplayCount : FrameLayout {
@@ -36,25 +37,31 @@ class DivisionDisplayCount : FrameLayout {
     val green = resources.getColor(R.color.green)
     val plaid = resources.getColor(R.color.plaid)
     val unknown = resources.getColor(R.color.unknown_party)
-    var size:Int = 0
-    var layout:View? = null
-    var title:String? = ""
-        set(value) {
-            val tv:TextView? = layout?.findViewById<TextView>(R.id.division_display_count_title_textview)
-            tv?.text = value
-        }
-    var votes:List<String>? = listOf("")
+    var layout: View? = null
+    var flatVotes: ArrayList<String> = arrayListOf()
+    var votes: List<List<String>> = listOf(listOf())
         set(value) {
             field = value
-            this.size = value?.size ?: 0
+            flatVotes.clear()
+            value.flatten().toCollection(flatVotes)
+            if(value.size>0) flatVotes.add(0, "s1")
+            if(value.size>0) flatVotes.add(value[0].size+1, "s2")
+            if(value.size>0) flatVotes.add(value[0].size + value[1].size +2, "s3")
+            if(value.size==4 && value[3].size>0) flatVotes.add(value[0].size + value[1].size + value[2].size + 3, "s4")
 
-            val grid:Int = (dpWidth / 28).toInt()
-            val padding = dpWidth - (24*grid)
-            layout?.setPadding((padding/2).toInt(), 0, (padding/2).toInt(), 0)
+            val grid: Int = (dpWidth / 28).toInt()
+            val padding = dpWidth - (24 * grid)
+            layout?.setPadding((padding / 2).toInt(), 0, (padding / 2).toInt(), 0)
 
-            val rc:RecyclerView? = layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
+            val rc: RecyclerView? = layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
             rc?.adapter = MyRecycler()
-            rc?.layoutManager = GridLayoutManager(context, grid, GridLayoutManager.VERTICAL, false)
+            val glm = GridLayoutManager(context, grid, GridLayoutManager.VERTICAL, false)
+            glm.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return if(flatVotes[position].startsWith("s")) grid else 1
+                }
+            }
+            rc?.layoutManager = glm
         }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
@@ -64,7 +71,6 @@ class DivisionDisplayCount : FrameLayout {
         val layoutInflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         this.layout = layoutInflator.inflate(R.layout.division_display_count, this)
         layout?.findViewById<RecyclerView>(R.id.division_display_count_recyclerview)
-                ?.isNestedScrollingEnabled = false
 
         val outMetrics = DisplayMetrics()
         val act = layout?.context as Activity
@@ -74,42 +80,59 @@ class DivisionDisplayCount : FrameLayout {
         this.dpWidth = outMetrics.widthPixels / density
     }
 
-    inner class MyRecycler : RecyclerView.Adapter<MyRecycler.ViewHolder>() {
+    inner class MyRecycler : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val v= DataBindingUtil.inflate<DivisionMpBlockBinding>(LayoutInflater.from(parent.context), R.layout.division_mp_block, parent, false)
-            val vh = ViewHolder(v)
-            return vh
+        override fun getItemViewType(position: Int): Int {
+            return if(flatVotes[position].startsWith("s"))
+                flatVotes[position].subSequence(1..flatVotes[position].length-1).toString().toInt()
+            else 0
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val id = MainActivity.model.party_nums[votes!![position]]
-            holder.root.setOnClickListener { _ ->
-                val id = MainActivity.model.ck[votes!![position]]?.get("mp_id").toString()
-                Updater.mpClicked(id.removeSurrounding("\""))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder = when(viewType) {
+            0 -> {
+                val v = DataBindingUtil.inflate<DivisionMpBlockBinding>(LayoutInflater.from(parent.context), R.layout.division_mp_block, parent, false)
+                ViewHolder(v.root)
+            } else -> {
+                val v = DataBindingUtil.inflate<DivisionMpHeaderBinding>(LayoutInflater.from(parent.context), R.layout.division_mp_header, parent, false)
+                SectionViewHolder(v, when(viewType) {
+                    1 -> { "Ayes (${votes[0].size})"}
+                    2 -> { "Noes (${votes[1].size})"}
+                    3 -> { "Absent (${votes[2].size})"}
+                    4 -> { "Hadn't entered parliament (${votes[3].size})"}
+                    else -> { ""}
+                })
             }
-            holder.root.setBackgroundColor(
-                when(id) {
-                    15 -> lab
-                    29 -> snp
-                    17 -> lib
-                    30 -> sinn
-                    7 -> dup
-                    4 -> cons
-                    44 -> green
-                    22 -> plaid
-                    else -> unknown })
         }
 
-        override fun getItemCount():Int = size
+        val party_ids = MainActivity.model.party_nums
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int): Unit = when (holder) {
+            is ViewHolder -> {
+                holder.root.setOnClickListener {
+                    val mpid = MainActivity.model.ck[flatVotes[position]]?.get("mp_id").toString()
+                    Updater.mpClicked(mpid.removeSurrounding("\""))
+                }
+                holder.root.setBackgroundColor( when (party_ids[flatVotes[position]]) {
+                        15 -> { lab } 29 -> { snp } 17 -> { lib } 30 -> { sinn }
+                        7 -> { dup } 4 -> { cons } 44 -> { green } 22 -> { plaid }
+                        else -> unknown
+                    })
+            }
+            is SectionViewHolder -> {}
+            else -> {}
+        }
 
-        inner class ViewHolder(itemView: DivisionMpBlockBinding) : RecyclerView.ViewHolder(itemView.root) {
-            val root:View = itemView.root
+        override fun getItemCount(): Int {
+            return flatVotes.size
+        }
+
+        inner class ViewHolder(val root: View) : RecyclerView.ViewHolder(root)
+        inner class SectionViewHolder(binding: DivisionMpHeaderBinding, title: String) : RecyclerView.ViewHolder(binding.root) {
+            init { binding.divisionMpBlockHeaderTextview.text = title }
         }
     }
 
-    public override fun onRestoreInstanceState(state: Parcelable) = when(state) {
-        is Bundle ->  super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
+    public override fun onRestoreInstanceState(state: Parcelable) = when (state) {
+        is Bundle -> super.onRestoreInstanceState(state.getParcelable<Parcelable>("instanceState"))
         else -> super.onRestoreInstanceState(state)
     }
 
